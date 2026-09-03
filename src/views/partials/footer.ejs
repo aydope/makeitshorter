@@ -1,0 +1,161 @@
+    </main>
+    <footer class="border-t border-border mt-auto">
+        <div class="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p class="text-xs text-text-tertiary">&copy; 2026 MakeItShorter</p>
+            <div class="flex gap-6">
+                <button onclick="showFooterModal('privacy')" class="text-xs text-text-tertiary hover:text-text-secondary transition-colors">Privacy</button>
+                <button onclick="showFooterModal('terms')" class="text-xs text-text-tertiary hover:text-text-secondary transition-colors">Terms</button>
+                <button onclick="showFooterModal('contact')" class="text-xs text-text-tertiary hover:text-text-secondary transition-colors">Contact</button>
+            </div>
+        </div>
+    </footer>
+
+    <div id="footerModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-6" onclick="if(event.target===this)closeFooterModal()">
+        <div class="bg-bg-secondary border border-border rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between p-6 border-b border-border flex-shrink-0">
+                <h3 class="text-base font-bold text-text-primary" id="footerModalTitle"></h3>
+                <button onclick="closeFooterModal()" class="w-8 h-8 bg-bg-hover hover:bg-bg-tertiary rounded-lg flex items-center justify-center">
+                    <i class="fas fa-times text-xs text-text-secondary"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 text-sm text-text-secondary leading-relaxed custom-scroll" id="footerModalContent"></div>
+            <div class="p-4 border-t border-border flex justify-end flex-shrink-0">
+                <button onclick="closeFooterModal()" class="btn-primary !py-2 !px-5 !text-xs">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-2"></div>
+
+    <script>
+    var footerModalData = {
+        privacy: {
+            title: 'Privacy Policy',
+            content: '<div class="space-y-3"><p>We collect minimal data: email, username, URLs you shorten, and basic click statistics.</p><p>Your data is never sold or shared with third parties. All passwords are hashed using bcrypt. We use essential cookies only for authentication purposes.</p><p class="text-xs text-text-tertiary mt-4">Last updated: 2026</p></div>'
+        },
+        terms: {
+            title: 'Terms of Service',
+            content: '<div class="space-y-3"><p>By using MakeItShorter, you agree not to shorten links to illegal content, malware, phishing sites, hate speech, spam, or any malicious material.</p><p>We reserve the right to suspend or terminate accounts that violate these terms. The service is provided "as is" without any warranties.</p><p class="text-xs text-text-tertiary mt-4">Last updated: 2026</p></div>'
+        },
+        contact: {
+            title: 'Get in Touch',
+            content: '<div class="space-y-4">' +
+                '<div class="bg-bg-tertiary border border-border rounded-xl p-4">' +
+                '<p class="text-xs text-text-tertiary mb-2 uppercase tracking-wider font-bold">Email</p>' +
+                '<a href="mailto:support@makeitshorter.com" class="text-accent-light hover:underline text-sm font-medium">support@makeitshorter.com</a>' +
+                '<p class="text-xs text-text-tertiary mt-2">Response within 24 hours</p>' +
+                '</div>' +
+                '<div class="bg-bg-tertiary border border-border rounded-xl p-4">' +
+                '<p class="text-xs text-text-tertiary mb-3 uppercase tracking-wider font-bold">Social</p>' +
+                '<div class="flex items-center gap-3">' +
+                '<a href="https://github.com/makeitshorter" target="_blank" class="w-10 h-10 bg-bg-hover border border-border rounded-xl flex items-center justify-center hover:border-text-tertiary transition-all group" title="GitHub">' +
+                '<i class="fab fa-github text-lg text-text-secondary group-hover:text-white transition-colors"></i>' +
+                '</a>' +
+                '<a href="https://twitter.com/makeitshorter" target="_blank" class="w-10 h-10 bg-bg-hover border border-border rounded-xl flex items-center justify-center hover:border-text-tertiary transition-all group" title="Twitter / X">' +
+                '<i class="fab fa-x-twitter text-lg text-text-secondary group-hover:text-white transition-colors"></i>' +
+                '</a>' +
+                '<a href="https://discord.gg/makeitshorter" target="_blank" class="w-10 h-10 bg-bg-hover border border-border rounded-xl flex items-center justify-center hover:border-text-tertiary transition-all group" title="Discord">' +
+                '<i class="fab fa-discord text-lg text-text-secondary group-hover:text-white transition-colors"></i>' +
+                '</a>' +
+                '<a href="https://linkedin.com/company/makeitshorter" target="_blank" class="w-10 h-10 bg-bg-hover border border-border rounded-xl flex items-center justify-center hover:border-text-tertiary transition-all group" title="LinkedIn">' +
+                '<i class="fab fa-linkedin-in text-lg text-text-secondary group-hover:text-white transition-colors"></i>' +
+                '</a>' +
+                '</div>' +
+                '</div>' +
+                '<div class="bg-bg-tertiary border border-border rounded-xl p-4">' +
+                '<p class="text-xs text-text-tertiary mb-3 uppercase tracking-wider font-bold">Open Source</p>' +
+                '<p class="text-xs text-text-secondary mb-4">MakeItShorter is open source. Contributions are welcome!</p>' +
+                '<div class="flex flex-col gap-2">' +
+                '<a href="https://github.com/makeitshorter/makeitshorter" target="_blank" class="flex items-center justify-between bg-bg-hover border border-border rounded-lg px-4 py-3 hover:border-text-tertiary transition-all group">' +
+                '<span class="flex items-center gap-2 text-sm font-medium text-text-primary">' +
+                '<i class="fab fa-github text-lg"></i>' +
+                'View on GitHub' +
+                '</span>' +
+                '<span class="flex items-center gap-1.5">' +
+                '<span class="text-xs text-text-tertiary">' +
+                '<i class="fas fa-star text-warning text-[10px] mr-0.5"></i>Star' +
+                '</span>' +
+                '<i class="fas fa-external-link-alt text-[10px] text-text-tertiary group-hover:text-text-secondary"></i>' +
+                '</span>' +
+                '</a>' +
+                '<a href="https://github.com/makeitshorter/makeitshorter/issues" target="_blank" class="flex items-center justify-between bg-bg-hover border border-border rounded-lg px-4 py-3 hover:border-text-tertiary transition-all group">' +
+                '<span class="flex items-center gap-2 text-sm font-medium text-text-primary">' +
+                '<i class="fas fa-bug text-sm"></i>' +
+                'Report an Issue' +
+                '</span>' +
+                '<i class="fas fa-external-link-alt text-[10px] text-text-tertiary group-hover:text-text-secondary"></i>' +
+                '</a>' +
+                '<a href="https://github.com/makeitshorter/makeitshorter/blob/main/CONTRIBUTING.md" target="_blank" class="flex items-center justify-between bg-bg-hover border border-border rounded-lg px-4 py-3 hover:border-text-tertiary transition-all group">' +
+                '<span class="flex items-center gap-2 text-sm font-medium text-text-primary">' +
+                '<i class="fas fa-code-pull-request text-sm"></i>' +
+                'Contribute' +
+                '</span>' +
+                '<i class="fas fa-external-link-alt text-[10px] text-text-tertiary group-hover:text-text-secondary"></i>' +
+                '</a>' +
+                '</div>' +
+                '</div>' +
+                '</div>'
+        }
+    };
+
+    function showFooterModal(t) {
+        var d = footerModalData[t];
+        if (!d) return;
+        document.getElementById('footerModalTitle').textContent = d.title;
+        document.getElementById('footerModalContent').innerHTML = d.content;
+        document.getElementById('footerModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeFooterModal() {
+        document.getElementById('footerModal').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeFooterModal();
+    });
+
+    function showToast(msg, type) {
+        type = type || 'info';
+        var colors = {
+            success: 'bg-success-bg border-success text-success',
+            error: 'bg-error-bg border-error text-error',
+            info: 'bg-bg-secondary border-border text-text-primary',
+            warning: 'bg-warning-bg border-warning text-warning'
+        };
+        var icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            info: 'fa-info-circle',
+            warning: 'fa-exclamation-triangle'
+        };
+        var t = document.createElement('div');
+        t.className = colors[type] + ' px-5 py-3 rounded-xl border text-sm font-medium flex items-center gap-3 shadow-xl';
+        t.innerHTML = '<i class="fas ' + icons[type] + '"></i>' + msg;
+        document.getElementById('toastContainer').appendChild(t);
+        setTimeout(function() {
+            t.style.opacity = '0';
+            t.style.transition = 'opacity 0.2s';
+            setTimeout(function() { t.remove(); }, 200);
+        }, 4000);
+    }
+    window.showToast = showToast;
+
+    function showConfirm(msg) {
+        return new Promise(function(r) {
+            var o = document.createElement('div');
+            o.className = 'fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-6';
+            o.innerHTML = '<div class="bg-bg-secondary border border-border rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl"><div class="w-10 h-10 bg-warning-bg rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-exclamation-triangle text-warning"></i></div><h3 class="text-base font-bold text-text-primary mb-2">Confirm</h3><p class="text-sm text-text-secondary mb-6">' + msg + '</p><div class="flex gap-3"><button class="flex-1 btn-secondary !py-2.5" id="cnfCancel">Cancel</button><button class="flex-1 !bg-error !text-white font-semibold rounded-lg py-2.5 px-5 text-sm hover:opacity-90 transition-opacity" id="cnfOk">Confirm</button></div></div>';
+            document.body.appendChild(o);
+            document.body.style.overflow = 'hidden';
+            o.querySelector('#cnfCancel').onclick = function() { o.remove(); document.body.style.overflow = ''; r(false); };
+            o.querySelector('#cnfOk').onclick = function() { o.remove(); document.body.style.overflow = ''; r(true); };
+            o.addEventListener('click', function(e) { if (e.target === o) { o.remove(); document.body.style.overflow = ''; r(false); } });
+        });
+    }
+    window.showConfirm = showConfirm;
+    </script>
+    <script src="/js/client.js"></script>
+</body>
+</html>

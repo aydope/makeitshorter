@@ -1,0 +1,277 @@
+<%- include('partials/header') %>
+<%- include('partials/sidebar') %>
+<div class="space-y-8">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold text-text-primary tracking-tight">Dashboard</h1>
+            <p class="text-sm text-text-tertiary mt-1">Welcome back, <span class="text-text-primary font-semibold"><%= user.username %></span></p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/" class="btn-secondary !py-2.5 !px-4 !text-xs"><i class="fas fa-wand-magic-sparkles mr-2"></i>Shorten URL</a>
+            <button onclick="showCreateModal()" class="btn-primary !py-2.5 !px-4 !text-xs"><i class="fas fa-plus mr-2"></i>New Link</button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card p-5 group hover:border-accent/30 transition-all duration-300 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-accent/5 rounded-bl-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="relative">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 bg-bg-tertiary rounded-lg flex items-center justify-center group-hover:bg-accent/10 transition-colors"><i class="fas fa-link text-text-tertiary group-hover:text-accent text-xs transition-colors"></i></div>
+                    <span class="text-[11px] text-text-tertiary uppercase tracking-wider font-bold">Total Links</span>
+                </div>
+                <p class="text-3xl font-extrabold text-text-primary" id="totalLinks">0</p>
+            </div>
+        </div>
+        <div class="card p-5 group hover:border-success/30 transition-all duration-300 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-success/5 rounded-bl-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="relative">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 bg-bg-tertiary rounded-lg flex items-center justify-center group-hover:bg-success/10 transition-colors"><i class="fas fa-chart-line text-text-tertiary group-hover:text-success text-xs transition-colors"></i></div>
+                    <span class="text-[11px] text-text-tertiary uppercase tracking-wider font-bold">Total Clicks</span>
+                </div>
+                <p class="text-3xl font-extrabold text-text-primary" id="totalClicks">0</p>
+            </div>
+        </div>
+        <div class="card p-5 group hover:border-purple-400/30 transition-all duration-300 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-purple-500/5 rounded-bl-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="relative">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 bg-bg-tertiary rounded-lg flex items-center justify-center"><i class="fas fa-check-circle text-text-tertiary text-xs"></i></div>
+                    <span class="text-[11px] text-text-tertiary uppercase tracking-wider font-bold">Active</span>
+                </div>
+                <p class="text-3xl font-extrabold text-text-primary" id="activeLinks">0</p>
+            </div>
+        </div>
+        <div class="card p-5 group hover:border-warning/30 transition-all duration-300">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-8 h-8 bg-bg-tertiary rounded-lg flex items-center justify-center"><i class="fas fa-gauge-high text-text-tertiary text-xs"></i></div>
+                <span class="text-[11px] text-text-tertiary uppercase tracking-wider font-bold">Today</span>
+            </div>
+            <div class="flex items-end justify-between">
+                <p class="text-3xl font-extrabold text-text-primary" id="dailyUsage">0</p>
+                <span class="text-xs text-text-tertiary">/ <span id="dailyLimit">-</span></span>
+            </div>
+            <div class="w-full bg-bg-tertiary rounded-full h-1.5 mt-3 overflow-hidden">
+                <div class="bg-gradient-to-r from-accent to-accent-light h-1.5 rounded-full transition-all duration-700 ease-out" id="dailyUsageBar" style="width:0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card overflow-hidden" id="links">
+        <div class="px-6 py-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-sm font-bold text-text-primary">Your Links</h2>
+                <div id="dailyLimitInfo" class="mt-1"></div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary text-xs"></i>
+                    <input type="text" id="linkSearchInput" placeholder="Search..." class="pl-9 pr-4 py-2 bg-bg-tertiary border border-border rounded-lg text-xs text-text-primary placeholder:text-text-tertiary focus:border-accent outline-none transition-colors w-40">
+                </div>
+                <button onclick="showCreateModal()" class="text-xs text-accent-light hover:text-white transition-colors font-medium flex items-center gap-1">
+                    <i class="fas fa-plus text-[10px]"></i> New
+                </button>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead><tr class="text-left text-[10px] font-bold text-text-tertiary uppercase tracking-widest border-b border-border bg-bg-tertiary/30"><th class="px-6 py-3 font-semibold">Short Link</th><th class="px-6 py-3 font-semibold hidden lg:table-cell">Original URL</th><th class="px-6 py-3 font-semibold text-center">Clicks</th><th class="px-6 py-3 font-semibold">Status</th><th class="px-6 py-3 font-semibold text-right">Actions</th></tr></thead>
+                <tbody id="linksTableBody"><tr><td colspan="5" class="text-center py-20">
+                    <div class="flex flex-col items-center text-text-tertiary">
+                        <div class="w-12 h-12 bg-bg-tertiary rounded-2xl flex items-center justify-center mb-3"><i class="fas fa-spinner fa-spin text-accent"></i></div>
+                        <p class="text-xs font-medium">Loading your links...</p>
+                    </div>
+                </td></tr></tbody>
+            </table>
+        </div>
+        <div class="px-6 py-3 border-t border-border bg-bg-tertiary/10" id="pagination"></div>
+    </div>
+
+    <div class="card overflow-hidden" id="profile">
+        <div class="px-6 py-4 border-b border-border"><h2 class="text-sm font-bold text-text-primary">Profile Settings</h2></div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <div class="lg:col-span-2">
+                    <div class="bg-bg-tertiary rounded-2xl p-6 text-center border border-border">
+                        <div class="w-20 h-20 bg-gradient-to-br from-accent to-accent-light rounded-2xl flex items-center justify-center text-white text-2xl font-extrabold shadow-lg shadow-accent/20 mx-auto mb-4 ring-2 ring-bg-secondary"><%= user.username.charAt(0).toUpperCase() %></div>
+                        <h3 class="text-base font-bold text-text-primary"><%= user.username %></h3>
+                        <p class="text-xs text-text-tertiary mt-1"><%= user.email %></p>
+                        <span class="badge mt-3 inline-flex items-center gap-1.5 <%= user.role==='admin'?'bg-accent/15 text-accent border border-accent/30':'bg-bg-tertiary text-text-secondary border border-border' %>"><span class="w-1 h-1 rounded-full <%= user.role==='admin'?'bg-accent':'bg-text-tertiary' %>"></span><%= user.role.charAt(0).toUpperCase()+user.role.slice(1) %></span>
+                    </div>
+                </div>
+                <div class="lg:col-span-3 space-y-6">
+                    <div class="bg-bg-tertiary rounded-2xl p-6 border border-border">
+                        <h3 class="text-sm font-bold text-text-primary mb-5 flex items-center gap-2"><i class="fas fa-user-pen text-accent text-xs"></i>Edit Information</h3>
+                        <form id="profileForm" class="space-y-4" novalidate>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <div class="relative">
+                                        <input type="text" id="profileUsername" value="<%= user.username %>" placeholder=" " class="peer w-full px-4 pt-6 pb-2.5 bg-bg-secondary border border-border rounded-xl text-sm font-medium text-text-primary placeholder-transparent focus:border-accent outline-none transition-all">
+                                        <label class="absolute left-4 text-text-tertiary transition-all duration-200 pointer-events-none peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:text-accent peer-[&:not(:placeholder-shown)]:top-2 peer-[&:not(:placeholder-shown)]:translate-y-0 peer-[&:not(:placeholder-shown)]:text-[10px]" style="line-height:1">Username</label>
+                                    </div>
+                                    <p class="hidden text-xs text-error mt-1 pl-1" id="profileUsernameError"></p>
+                                </div>
+                                <div>
+                                    <div class="relative">
+                                        <input type="email" id="profileEmail" value="<%= user.email %>" placeholder=" " class="peer w-full px-4 pt-6 pb-2.5 bg-bg-secondary border border-border rounded-xl text-sm font-medium text-text-primary placeholder-transparent focus:border-accent outline-none transition-all">
+                                        <label class="absolute left-4 text-text-tertiary transition-all duration-200 pointer-events-none peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:text-accent peer-[&:not(:placeholder-shown)]:top-2 peer-[&:not(:placeholder-shown)]:translate-y-0 peer-[&:not(:placeholder-shown)]:text-[10px]" style="line-height:1">Email</label>
+                                    </div>
+                                    <p class="hidden text-xs text-error mt-1 pl-1" id="profileEmailError"></p>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary !py-2.5 !px-5 !text-xs"><i class="fas fa-save mr-2"></i>Save Changes</button>
+                        </form>
+                    </div>
+                    <div class="bg-bg-tertiary rounded-2xl p-6 border border-border">
+                        <h3 class="text-sm font-bold text-text-primary mb-5 flex items-center gap-2"><i class="fas fa-lock text-accent text-xs"></i>Change Password</h3>
+                        <div class="space-y-3">
+                            <div class="relative">
+                                <input type="password" id="currentPassword" placeholder=" " class="peer w-full px-4 pt-6 pb-2.5 bg-bg-secondary border border-border rounded-xl text-sm text-text-primary placeholder-transparent focus:border-accent outline-none transition-all">
+                                <label class="absolute left-4 text-text-tertiary transition-all duration-200 pointer-events-none peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:text-accent peer-[&:not(:placeholder-shown)]:top-2 peer-[&:not(:placeholder-shown)]:translate-y-0 peer-[&:not(:placeholder-shown)]:text-[10px]" style="line-height:1">Current password</label>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="relative">
+                                    <input type="password" id="newPassword" placeholder=" " class="peer w-full px-4 pt-6 pb-2.5 bg-bg-secondary border border-border rounded-xl text-sm text-text-primary placeholder-transparent focus:border-accent outline-none transition-all">
+                                    <label class="absolute left-4 text-text-tertiary transition-all duration-200 pointer-events-none peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:text-accent peer-[&:not(:placeholder-shown)]:top-2 peer-[&:not(:placeholder-shown)]:translate-y-0 peer-[&:not(:placeholder-shown)]:text-[10px]" style="line-height:1">New password</label>
+                                </div>
+                                <div class="relative">
+                                    <input type="password" id="confirmNewPassword" placeholder=" " class="peer w-full px-4 pt-6 pb-2.5 bg-bg-secondary border border-border rounded-xl text-sm text-text-primary placeholder-transparent focus:border-accent outline-none transition-all">
+                                    <label class="absolute left-4 text-text-tertiary transition-all duration-200 pointer-events-none peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:text-accent peer-[&:not(:placeholder-shown)]:top-2 peer-[&:not(:placeholder-shown)]:translate-y-0 peer-[&:not(:placeholder-shown)]:text-[10px]" style="line-height:1">Confirm password</label>
+                                </div>
+                            </div>
+                            <button type="button" id="changePasswordBtn" class="btn-secondary w-full !py-2.5 !text-xs"><i class="fas fa-rotate mr-2"></i>Update Password</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="profileMessage" class="hidden mt-6 p-4 rounded-xl text-sm font-medium"></div>
+        </div>
+    </div>
+</div>
+
+<div id="createModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-6" onclick="if(event.target===this)closeCreateModal()">
+    <div class="bg-bg-secondary border border-border rounded-2xl shadow-2xl w-full max-w-md animate-scale-in">
+        <div class="flex items-center justify-between p-6 border-b border-border">
+            <div>
+                <h3 class="text-base font-bold text-text-primary">Create Short Link</h3>
+                <p class="text-xs text-text-tertiary mt-0.5">Enter a URL to shorten it</p>
+            </div>
+            <button onclick="closeCreateModal()" class="w-8 h-8 bg-bg-hover hover:bg-bg-tertiary rounded-lg flex items-center justify-center transition-colors"><i class="fas fa-times text-xs text-text-secondary"></i></button>
+        </div>
+        <form id="createLinkForm" class="p-6 space-y-4">
+            <div>
+                <label class="text-[11px] font-bold text-text-tertiary uppercase tracking-wider">Destination URL <span class="text-error">*</span></label>
+                <div class="relative mt-1.5">
+                    <i class="fas fa-link absolute left-3.5 top-1/2 -translate-y-1/2 text-text-tertiary text-xs"></i>
+                    <input type="url" id="modalOriginalUrl" required placeholder="https://example.com" class="w-full pl-10 pr-4 py-3 bg-bg-tertiary border border-border rounded-xl text-sm font-medium text-text-primary placeholder:text-text-tertiary focus:border-accent outline-none transition-all font-mono">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-[11px] font-bold text-text-tertiary uppercase tracking-wider">Custom Code</label>
+                    <div class="flex items-center mt-1.5 bg-bg-tertiary border border-border rounded-xl overflow-hidden focus-within:border-accent transition-all">
+                        <span class="pl-3.5 pr-1 text-xs text-text-tertiary font-mono">/l/</span>
+                        <input type="text" id="modalCustomCode" placeholder="alias" class="flex-1 py-3 pr-3.5 text-sm font-medium bg-transparent border-0 outline-none text-text-primary placeholder:text-text-tertiary font-mono">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[11px] font-bold text-text-tertiary uppercase tracking-wider">Title</label>
+                    <input type="text" id="modalTitle" placeholder="Optional title" class="w-full mt-1.5 px-3.5 py-3 bg-bg-tertiary border border-border rounded-xl text-sm font-medium text-text-primary placeholder:text-text-tertiary focus:border-accent outline-none transition-all">
+                </div>
+            </div>
+            <div id="modalError" class="hidden p-3 bg-error-bg border border-error/30 rounded-xl text-sm text-error flex items-start gap-2">
+                <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0 text-xs"></i>
+                <span id="modalErrorMessage"></span>
+            </div>
+            <div id="modalLimitInfo" class="p-3 bg-bg-tertiary border border-border rounded-xl text-xs text-text-secondary flex items-center gap-2">
+                <i class="fas fa-info-circle text-accent text-xs"></i>
+                <span id="modalLimitText">-</span>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeCreateModal()" class="btn-secondary flex-1 !py-3">Cancel</button>
+                <button type="submit" class="btn-primary flex-1 !py-3"><i class="fas fa-wand-magic-sparkles mr-2"></i>Shorten</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.peer:focus ~ label, .peer:not(:placeholder-shown) ~ label { top: 0.5rem !important; transform: translateY(0) !important; font-size: 10px !important; line-height: 1 !important; }
+.peer:focus ~ label { color: #0070f3 !important; }
+.peer-placeholder-shown ~ label { top: 50% !important; transform: translateY(-50%) !important; font-size: 14px !important; color: #737373 !important; }
+</style>
+
+<script>window.userData={_id:'<%= user._id %>',username:'<%= user.username %>',email:'<%= user.email %>',role:'<%= user.role %>',isActive:'<%= user.isActive %>'==="true"};</script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){if(window.userData&&typeof initializeDashboard==='function')initializeDashboard(window.userData)});
+function showCreateModal(){document.getElementById('createModal').classList.remove('hidden');document.body.style.overflow='hidden'}
+function closeCreateModal(){document.getElementById('createModal').classList.add('hidden');document.body.style.overflow=''}
+
+// Profile validation with debounce
+(function(){
+    var userInput = document.getElementById('profileUsername');
+    var emailInput = document.getElementById('profileEmail');
+    var userErr = document.getElementById('profileUsernameError');
+    var emailErr = document.getElementById('profileEmailError');
+
+    function isValidEmail(email) {
+        if (!email || typeof email !== 'string') return false;
+        email = email.trim();
+        if (email.length > 254) return false;
+        return /^[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,6}$/.test(email);
+    }
+
+    function validateUsername() {
+        var val = userInput.value.trim();
+        userInput.classList.remove('border-error', 'border-success');
+        userErr.classList.add('hidden');
+        if (!val) {
+            userErr.textContent = 'Username is required';
+            userErr.classList.remove('hidden');
+            userInput.classList.add('border-error');
+        } else if (val.length < 3) {
+            userErr.textContent = 'Min. 3 characters';
+            userErr.classList.remove('hidden');
+            userInput.classList.add('border-error');
+        } else if (!/^[a-zA-Z0-9._-]+$/.test(val)) {
+            userErr.textContent = 'Only a-z, A-Z, 0-9, . _ - allowed';
+            userErr.classList.remove('hidden');
+            userInput.classList.add('border-error');
+        } else {
+            userInput.classList.add('border-success');
+        }
+    }
+
+    function validateEmail() {
+        var val = emailInput.value.trim();
+        emailInput.classList.remove('border-error', 'border-success');
+        emailErr.classList.add('hidden');
+        if (!val) {
+            emailErr.textContent = 'Email is required';
+            emailErr.classList.remove('hidden');
+            emailInput.classList.add('border-error');
+        } else if (!isValidEmail(val)) {
+            emailErr.textContent = 'Valid email required (e.g. user@domain.com)';
+            emailErr.classList.remove('hidden');
+            emailInput.classList.add('border-error');
+        } else {
+            emailInput.classList.add('border-success');
+        }
+    }
+
+    function debounce(fn, wait) {
+        var timeout;
+        return function() {
+            var ctx = this, args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(function() { fn.apply(ctx, args); }, wait);
+        };
+    }
+
+    userInput.addEventListener('input', debounce(validateUsername, 400));
+    emailInput.addEventListener('input', debounce(validateEmail, 400));
+})();
+</script>
+</div>
+<%- include('partials/footer') %>

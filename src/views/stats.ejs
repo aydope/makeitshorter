@@ -1,0 +1,362 @@
+<%- include('partials/header') %>
+<%- include('partials/sidebar') %>
+<div class="space-y-8">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <a href="/dashboard" class="text-text-tertiary hover:text-text-primary transition-colors">
+                    <i class="fas fa-arrow-left text-xs"></i>
+                </a>
+                <h1 class="text-2xl font-extrabold text-text-primary tracking-tight">Link Analytics</h1>
+            </div>
+            <p class="text-sm text-text-tertiary mt-1">
+                <a href="/l/<%= link.shortCode %>" target="_blank" class="text-accent-light hover:underline font-mono">
+                    /l/<%= link.shortCode %>
+                </a>
+                <% if (link.title) { %>
+                    <span class="mx-2">·</span>
+                    <%= link.title %>
+                <% } %>
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/dashboard" class="btn-secondary !py-2.5 !px-4 !text-xs">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card p-5">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-8 h-8 bg-bg-tertiary rounded-lg flex items-center justify-center">
+                    <i class="fas fa-eye text-accent text-xs"></i>
+                </div>
+                <span class="text-[11px] text-text-tertiary uppercase tracking-wider font-bold">Total Visits</span>
+            </div>
+            <p class="text-3xl font-extrabold text-text-primary" id="totalVisits">0</p>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-8 h-8 bg-bg-tertiary rounded-lg flex items-center justify-center">
+                    <i class="fas fa-users text-success text-xs"></i>
+                </div>
+                <span class="text-[11px] text-text-tertiary uppercase tracking-wider font-bold">Unique Visitors</span>
+            </div>
+            <p class="text-3xl font-extrabold text-text-primary" id="uniqueVisitors">0</p>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-8 h-8 bg-bg-tertiary rounded-lg flex items-center justify-center">
+                    <i class="fas fa-chart-line text-purple-400 text-xs"></i>
+                </div>
+                <span class="text-[11px] text-text-tertiary uppercase tracking-wider font-bold">Total Clicks</span>
+            </div>
+            <p class="text-3xl font-extrabold text-text-primary"><%= link.clicks || 0 %></p>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-8 h-8 bg-bg-tertiary rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar text-warning text-xs"></i>
+                </div>
+                <span class="text-[11px] text-text-tertiary uppercase tracking-wider font-bold">Created</span>
+            </div>
+            <p class="text-sm font-bold text-text-primary mt-2">
+                <%= new Date(link.createdAt).toLocaleDateString() %>
+            </p>
+        </div>
+    </div>
+
+    <!-- Period Filter -->
+    <div class="card p-4">
+        <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-xs text-text-tertiary font-bold mr-2">Period:</span>
+            <button onclick="changePeriod('1h')" class="period-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-bg-tertiary text-text-secondary hover:bg-bg-hover transition-colors" data-period="1h">1 Hour</button>
+            <button onclick="changePeriod('24h')" class="period-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-bg-tertiary text-text-secondary hover:bg-bg-hover transition-colors" data-period="24h">24 Hours</button>
+            <button onclick="changePeriod('7d')" class="period-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-accent/10 text-accent border border-accent/30" data-period="7d">7 Days</button>
+            <button onclick="changePeriod('30d')" class="period-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-bg-tertiary text-text-secondary hover:bg-bg-hover transition-colors" data-period="30d">30 Days</button>
+            <button onclick="changePeriod('90d')" class="period-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-bg-tertiary text-text-secondary hover:bg-bg-hover transition-colors" data-period="90d">90 Days</button>
+            <button onclick="changePeriod('all')" class="period-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-bg-tertiary text-text-secondary hover:bg-bg-hover transition-colors" data-period="all">All Time</button>
+        </div>
+    </div>
+
+    <!-- Analytics Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Daily Stats Chart -->
+        <div class="card p-6">
+            <h3 class="text-sm font-bold text-text-primary mb-4">Daily Visits</h3>
+            <div id="dailyChart" class="h-64 flex items-center justify-center text-text-tertiary overflow-x-auto">
+                <i class="fas fa-spinner fa-spin text-accent"></i>
+            </div>
+        </div>
+
+        <!-- Hourly Stats -->
+        <div class="card p-6">
+            <h3 class="text-sm font-bold text-text-primary mb-4">Hourly Distribution</h3>
+            <div id="hourlyChart" class="h-64 flex items-center justify-center text-text-tertiary overflow-x-auto">
+                <i class="fas fa-spinner fa-spin text-accent"></i>
+            </div>
+        </div>
+
+        <!-- Device Stats -->
+        <div class="card p-6">
+            <h3 class="text-sm font-bold text-text-primary mb-4">Devices</h3>
+            <div id="deviceStats" class="space-y-3">
+                <div class="text-center text-text-tertiary py-8">
+                    <i class="fas fa-spinner fa-spin text-accent"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Browser Stats -->
+        <div class="card p-6">
+            <h3 class="text-sm font-bold text-text-primary mb-4">Browsers</h3>
+            <div id="browserStats" class="space-y-3">
+                <div class="text-center text-text-tertiary py-8">
+                    <i class="fas fa-spinner fa-spin text-accent"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- OS Stats -->
+        <div class="card p-6">
+            <h3 class="text-sm font-bold text-text-primary mb-4">Operating Systems</h3>
+            <div id="osStats" class="space-y-3">
+                <div class="text-center text-text-tertiary py-8">
+                    <i class="fas fa-spinner fa-spin text-accent"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Country Stats -->
+        <div class="card p-6">
+            <h3 class="text-sm font-bold text-text-primary mb-4">Top Countries</h3>
+            <div id="countryStats" class="space-y-3">
+                <div class="text-center text-text-tertiary py-8">
+                    <i class="fas fa-spinner fa-spin text-accent"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Referrer Stats -->
+        <div class="card p-6 lg:col-span-2">
+            <h3 class="text-sm font-bold text-text-primary mb-4">Top Referrers</h3>
+            <div id="refererStats" class="space-y-3">
+                <div class="text-center text-text-tertiary py-8">
+                    <i class="fas fa-spinner fa-spin text-accent"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Visits -->
+    <div class="card overflow-hidden">
+        <div class="px-6 py-4 border-b border-border">
+            <h2 class="text-sm font-bold text-text-primary">10 Recent Visits</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-left text-[10px] font-bold text-text-tertiary uppercase tracking-widest border-b border-border bg-bg-tertiary/30">
+                        <th class="px-6 py-3">Time</th>
+                        <th class="px-6 py-3">IP</th>
+                        <th class="px-6 py-3">Device</th>
+                        <th class="px-6 py-3">Browser</th>
+                        <th class="px-6 py-3">OS</th>
+                        <th class="px-6 py-3">Location</th>
+                    </tr>
+                </thead>
+                <tbody id="recentVisits">
+                    <tr>
+                        <td colspan="6" class="text-center py-12 text-text-tertiary">
+                            <i class="fas fa-spinner fa-spin text-accent"></i>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+window.linkId = '<%= link._id %>';
+window.currentPeriod = '7d';
+
+async function loadAnalytics() {
+    try {
+        const response = await api.get(`/api/analytics/${window.linkId}?period=${window.currentPeriod}`);
+        const data = await response.json();
+
+        if (data.success) {
+            updateAnalyticsUI(data.data);
+        }
+    } catch (error) {
+        console.error('Failed to load analytics:', error);
+    }
+}
+
+function updateAnalyticsUI(analytics) {
+    // Update summary
+    document.getElementById('totalVisits').textContent = analytics.summary.totalVisits;
+    document.getElementById('uniqueVisitors').textContent = analytics.summary.uniqueVisitors;
+
+    // Update device stats
+    const deviceStats = document.getElementById('deviceStats');
+    deviceStats.innerHTML = analytics.deviceStats.length > 0
+        ? analytics.deviceStats.map(stat =>
+            createStatBar(stat._id || 'Unknown', stat.count, analytics.summary.totalVisits)
+        ).join('')
+        : '<p class="text-xs text-text-tertiary">No data available</p>';
+
+    // Update browser stats
+    const browserStats = document.getElementById('browserStats');
+    browserStats.innerHTML = analytics.browserStats.length > 0
+        ? analytics.browserStats.map(stat =>
+            createStatBar(stat._id || 'Unknown', stat.count, analytics.summary.totalVisits)
+        ).join('')
+        : '<p class="text-xs text-text-tertiary">No data available</p>';
+
+    // Update OS stats
+    const osStats = document.getElementById('osStats');
+    osStats.innerHTML = analytics.osStats.length > 0
+        ? analytics.osStats.map(stat =>
+            createStatBar(stat._id || 'Unknown', stat.count, analytics.summary.totalVisits)
+        ).join('')
+        : '<p class="text-xs text-text-tertiary">No data available</p>';
+
+    // Update country stats
+    const countryStats = document.getElementById('countryStats');
+    countryStats.innerHTML = analytics.countryStats.length > 0
+        ? analytics.countryStats.map(stat =>
+            createStatBar(stat._id || 'Unknown', stat.count, analytics.summary.totalVisits)
+        ).join('')
+        : '<p class="text-xs text-text-tertiary">No data available</p>';
+
+    // Update referer stats
+    const refererStats = document.getElementById('refererStats');
+    refererStats.innerHTML = analytics.refererStats.length > 0
+        ? analytics.refererStats.map(stat =>
+            createStatBar(stat._id || 'Unknown', stat.count, analytics.summary.totalVisits)
+        ).join('')
+        : '<p class="text-xs text-text-tertiary">No data available</p>';
+
+    // Update daily chart
+    createDailyChart(analytics.dailyStats);
+
+    // Update hourly chart
+    createHourlyChart(analytics.hourlyStats);
+
+    // Update recent visits
+    updateRecentVisits(analytics.recentVisits);
+}
+
+function createStatBar(label, count, total) {
+    const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+    return `
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-text-secondary w-24 truncate" title="${label}">${label}</span>
+            <div class="flex items-center gap-2 flex-1 ml-4">
+                <div class="flex-1 bg-bg-tertiary rounded-full h-1.5 overflow-hidden">
+                    <div class="bg-accent h-1.5 rounded-full" style="width: ${percentage}%"></div>
+                </div>
+                <span class="text-xs text-text-tertiary w-20 text-right">${count} (${percentage}%)</span>
+            </div>
+        </div>
+    `;
+}
+
+function createDailyChart(data) {
+    const container = document.getElementById('dailyChart');
+    if (!data || data.length === 0) {
+        container.innerHTML = '<p class="text-xs">No data available</p>';
+        return;
+    }
+
+    const maxCount = Math.max(...data.map(d => d.count), 1);
+    const bars = data.map(d => {
+        const height = (d.count / maxCount) * 100;
+        return `
+            <div class="flex flex-col items-center gap-1 flex-1 min-w-[40px]">
+                <div class="w-full bg-bg-tertiary rounded-t-lg overflow-hidden flex items-end" style="height: 200px">
+                    <div class="w-full bg-gradient-to-t from-accent to-accent-light rounded-t-lg transition-all duration-300" style="height: ${height}%"></div>
+                </div>
+                <span class="text-[10px] text-text-tertiary">${d.date.slice(5)}</span>
+                <span class="text-[10px] text-text-tertiary font-bold">${d.count}</span>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = `<div class="flex items-end gap-2 w-full h-full min-w-max">${bars}</div>`;
+}
+
+function createHourlyChart(data) {
+    const container = document.getElementById('hourlyChart');
+    if (!data || data.length === 0) {
+        container.innerHTML = '<p class="text-xs">No data available</p>';
+        return;
+    }
+
+    const hours = Array.from({length: 24}, (_, i) => {
+        const hourData = data.find(d => d._id === i);
+        return hourData || { _id: i, count: 0 };
+    });
+
+    const maxCount = Math.max(...hours.map(d => d.count), 1);
+
+    const bars = hours.map(h => {
+        const height = (h.count / maxCount) * 100;
+        return `
+            <div class="flex-1 flex flex-col items-center gap-1 min-w-[20px]">
+                <div class="w-full bg-bg-tertiary rounded-t-lg overflow-hidden flex items-end" style="height: 100px">
+                    <div class="w-full bg-gradient-to-t from-success to-success-light rounded-t-lg" style="height: ${height}%"></div>
+                </div>
+                <span class="text-[9px] text-text-tertiary">${h._id}</span>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = `<div class="flex items-end gap-1 w-full h-full min-w-max">${bars}</div>`;
+}
+
+function updateRecentVisits(visits) {
+    const tbody = document.getElementById('recentVisits');
+    if (!visits || visits.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-12 text-text-tertiary">No visits recorded</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = visits.map(visit => `
+        <tr class="border-b border-border hover:bg-bg-hover transition-colors">
+            <td class="px-6 py-3 text-xs text-text-secondary">${new Date(visit.timestamp).toLocaleString()}</td>
+            <td class="px-6 py-3 text-xs font-mono text-text-secondary">${visit.ip || 'Unknown'}</td>
+            <td class="px-6 py-3 text-xs text-text-secondary">${visit.userAgent?.device || 'Unknown'}</td>
+            <td class="px-6 py-3 text-xs text-text-secondary">${visit.userAgent?.browser || 'Unknown'}</td>
+            <td class="px-6 py-3 text-xs text-text-secondary">${visit.userAgent?.os || 'Unknown'}</td>
+            <td class="px-6 py-3 text-xs text-text-secondary">${visit.geo?.country || 'Unknown'}</td>
+        </tr>
+    `).join('');
+}
+
+function changePeriod(period) {
+    window.currentPeriod = period;
+
+    // Update button styles
+    document.querySelectorAll('.period-btn').forEach(btn => {
+        if (btn.dataset.period === period) {
+            btn.className = 'period-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-accent/10 text-accent border border-accent/30';
+        } else {
+            btn.className = 'period-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-bg-tertiary text-text-secondary hover:bg-bg-hover transition-colors';
+        }
+    });
+
+    loadAnalytics();
+}
+
+// Load analytics on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadAnalytics();
+});
+</script>
+</div>
+<%- include('partials/footer') %>

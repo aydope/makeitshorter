@@ -1,0 +1,112 @@
+<% if(typeof user!=='undefined'&&user){ %>
+<div class="flex min-h-screen">
+    <aside class="w-60 bg-bg-secondary border-r border-border flex-shrink-0 hidden lg:flex flex-col">
+        <div class="p-5 border-b border-border">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-accent to-accent-light rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-accent/20">
+                    <%= user.username.charAt(0).toUpperCase() %>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-sm font-bold text-text-primary truncate"><%= user.username %></p>
+                    <p class="text-[11px] text-text-tertiary truncate"><%= user.email %></p>
+                </div>
+            </div>
+            <span class="badge mt-2.5 inline-flex items-center gap-1.5 <%= user.role==='admin'?'bg-accent/15 text-accent border border-accent/30':'bg-bg-tertiary text-text-secondary border border-border' %>">
+                <span class="w-1 h-1 rounded-full <%= user.role==='admin'?'bg-accent':'bg-text-tertiary' %>"></span>
+                <%= user.role.charAt(0).toUpperCase()+user.role.slice(1) %>
+            </span>
+        </div>
+
+        <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto custom-scroll">
+            <p class="px-3 pt-2 pb-1 text-[10px] font-bold text-text-tertiary uppercase tracking-widest">Main</p>
+
+            <a href="/dashboard" data-page="dashboard" class="sidebar-link group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 border border-transparent">
+                <i class="fas fa-chart-pie w-4 text-text-tertiary group-hover:text-text-secondary transition-colors"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <% if(user.role==='admin'){ %>
+            <a href="/" data-page="shorten" class="sidebar-link group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-all duration-200 border border-transparent">
+                <i class="fas fa-wand-magic-sparkles w-4 text-text-tertiary group-hover:text-text-secondary transition-colors"></i>
+                <span>Shorten Link</span>
+            </a>
+            <% }else{ %>
+            <a href="/dashboard#links" data-page="links" class="sidebar-link group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-all duration-200 border border-transparent">
+                <i class="fas fa-link w-4 text-text-tertiary group-hover:text-text-secondary transition-colors"></i>
+                <span>My Links</span>
+            </a>
+            <% } %>
+
+            <a href="/dashboard#profile" data-page="profile" class="sidebar-link group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-all duration-200 border border-transparent">
+                <i class="fas fa-user-gear w-4 text-text-tertiary group-hover:text-text-secondary transition-colors"></i>
+                <span>Profile</span>
+            </a>
+
+            <% if(user.role==='admin'){ %>
+            <div class="pt-4 mt-3 border-t border-border">
+                <p class="px-3 pt-2 pb-1 text-[10px] font-bold text-accent uppercase tracking-widest">Admin</p>
+                <a href="/admin/dashboard" data-page="admin" class="sidebar-link group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 border border-transparent">
+                    <i class="fas fa-crown w-4 text-text-tertiary group-hover:text-text-secondary transition-colors"></i>
+                    <span>Admin Panel</span>
+                </a>
+            </div>
+            <% } %>
+        </nav>
+
+        <div class="p-4 border-t border-border">
+            <div class="flex items-center justify-between text-[11px]">
+                <div class="flex items-center gap-2 text-text-tertiary">
+                    <span class="w-1.5 h-1.5 bg-success rounded-full animate-pulse"></span>
+                    <span>Operational</span>
+                </div>
+                <span class="text-text-tertiary">v1.0</span>
+            </div>
+        </div>
+    </aside>
+    <div class="flex-1 p-6 lg:p-8 min-w-0">
+
+    <script>
+(function(){
+    var links = document.querySelectorAll('.sidebar-link');
+    var currentPath = window.location.pathname;
+    var currentHash = window.location.hash.replace('#', '');
+
+    // Determine current page
+    var currentPage = 'dashboard';
+    if (currentPath === '/admin/dashboard') currentPage = 'admin';
+    else if (currentHash === 'links') currentPage = 'links';
+    else if (currentHash === 'profile') currentPage = 'profile';
+    else if (currentPath === '/' && document.querySelector('[data-page="shorten"]')) currentPage = 'shorten';
+
+    function setActive(page) {
+        links.forEach(function(x) {
+            x.classList.remove('bg-bg-tertiary', 'text-text-primary', 'bg-accent/10', 'text-accent', 'border-border', 'border-accent/20');
+            x.classList.add('text-text-secondary', 'border-transparent');
+        });
+
+        var active = document.querySelector('[data-page="' + page + '"]');
+        if (!active) return;
+
+        if (page === 'admin') {
+            active.classList.add('bg-accent/10', 'text-accent', 'border-accent/20');
+        } else {
+            active.classList.add('bg-bg-tertiary', 'text-text-primary', 'border-border');
+        }
+        active.classList.remove('text-text-secondary', 'border-transparent');
+    }
+
+    setActive(currentPage);
+
+    links.forEach(function(l) {
+        l.addEventListener('click', function() {
+            setActive(this.dataset.page);
+        });
+    });
+
+    window.addEventListener('hashchange', function() {
+        var h = window.location.hash.replace('#', '');
+        if (h) setActive(h);
+    });
+})();
+</script>
+<% } %>

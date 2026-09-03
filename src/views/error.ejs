@@ -1,0 +1,68 @@
+<%- include('partials/header') %>
+<div class="min-h-[80vh] flex items-center justify-center px-6 py-12">
+    <div class="text-center max-w-md">
+        <% if(locals.error && error.statusCode === 404) { %>
+            <div class="w-24 h-24 bg-bg-secondary border border-border rounded-3xl flex items-center justify-center mx-auto mb-8">
+                <i class="fas fa-map-signs text-4xl text-text-tertiary"></i>
+            </div>
+            <h1 class="text-7xl font-extrabold text-text-primary mb-3">404</h1>
+            <h2 class="text-xl font-bold text-text-primary mb-2">Page not found</h2>
+            <p class="text-text-secondary text-sm mb-8">The page you're looking for doesn't exist or has been moved.</p>
+        <% } else if(locals.error && error.statusCode === 403) { %>
+            <div class="w-24 h-24 bg-error-bg border border-error/30 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                <i class="fas fa-lock text-4xl text-error"></i>
+            </div>
+            <h1 class="text-7xl font-extrabold text-text-primary mb-3">403</h1>
+            <h2 class="text-xl font-bold text-text-primary mb-2">Access denied</h2>
+            <p class="text-text-secondary text-sm mb-8">You don't have permission to access this resource.</p>
+        <% } else if(locals.error && error.statusCode === 401) { %>
+            <div class="w-24 h-24 bg-warning-bg border border-warning/30 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                <i class="fas fa-key text-4xl text-warning"></i>
+            </div>
+            <h1 class="text-7xl font-extrabold text-text-primary mb-3">401</h1>
+            <h2 class="text-xl font-bold text-text-primary mb-2">Unauthorized</h2>
+            <p class="text-text-secondary text-sm mb-8">Please sign in to access this page.</p>
+            <div class="flex items-center justify-center gap-3">
+                <a href="/login" class="btn-primary">Sign In</a>
+                <a href="/" class="btn-secondary">Back to Home</a>
+            </div>
+        <% } else if(locals.error && error.statusCode === 429) { %>
+            <div class="w-24 h-24 bg-warning-bg border border-warning/30 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                <i class="fas fa-gauge-high text-4xl text-warning"></i>
+            </div>
+            <h1 class="text-7xl font-extrabold text-text-primary mb-3">429</h1>
+            <h2 class="text-xl font-bold text-text-primary mb-2">Too many requests</h2>
+            <p class="text-text-secondary text-sm mb-8"><%= error.message %></p>
+            <div class="flex items-center justify-center gap-3">
+                <button onclick="location.reload()" class="btn-primary">Try Again</button>
+                <a href="/" class="btn-secondary">Back to Home</a>
+            </div>
+        <% } else if(locals.error && error.statusCode >= 500) { %>
+            <div class="w-24 h-24 bg-error-bg border border-error/30 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                <i class="fas fa-server text-4xl text-error"></i>
+            </div>
+            <h1 class="text-7xl font-extrabold text-text-primary mb-3"><%= error.statusCode %></h1>
+            <h2 class="text-xl font-bold text-text-primary mb-2">Server error</h2>
+            <p class="text-text-secondary text-sm mb-8">Something went wrong on our end. Please try again later.</p>
+        <% } else { %>
+            <div class="w-24 h-24 bg-bg-secondary border border-border rounded-3xl flex items-center justify-center mx-auto mb-8">
+                <i class="fas fa-exclamation-triangle text-4xl text-text-tertiary"></i>
+            </div>
+            <h1 class="text-7xl font-extrabold text-text-primary mb-3">Oops</h1>
+            <h2 class="text-xl font-bold text-text-primary mb-2">Something went wrong</h2>
+            <p class="text-text-secondary text-sm mb-8">An unexpected error occurred.</p>
+        <% } %>
+
+        <% if(!locals.error || error.statusCode !== 401 && error.statusCode !== 429) { %>
+        <div class="flex items-center justify-center gap-3">
+            <a href="/" class="btn-primary">Back to Home</a>
+            <button onclick="history.back()" class="btn-secondary">Go Back</button>
+        </div>
+        <% } %>
+
+        <p class="text-xs text-text-tertiary mt-10">
+            Need help? <button onclick="showFooterModal('contact')" class="text-accent-light hover:underline">Contact support</button>
+        </p>
+    </div>
+</div>
+<%- include('partials/footer') %>

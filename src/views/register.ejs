@@ -1,0 +1,344 @@
+<%- include('partials/header') %>
+<div class="min-h-[80vh] flex items-center justify-center px-6 py-12">
+  <div class="w-full max-w-sm">
+    <div class="text-center mb-8">
+      <div
+        class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mx-auto mb-4"
+      >
+        <i class="fas fa-link text-black text-sm"></i>
+      </div>
+      <h1 class="text-xl font-bold text-text-primary">Create account</h1>
+      <p class="text-sm text-text-tertiary mt-1">Join MakeItShorter today</p>
+    </div>
+
+    <form id="registerForm" class="space-y-4" novalidate>
+      <div class="relative">
+        <input
+          type="text"
+          id="username"
+          required
+          placeholder=" "
+          autocomplete="username"
+          class="peer w-full px-4 pt-6 pb-2.5 bg-bg-secondary border border-border rounded-xl text-sm font-medium text-text-primary placeholder-transparent focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all duration-200"
+        />
+        <label
+          for="username"
+          class="absolute left-4 text-text-tertiary transition-all duration-200 pointer-events-none peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:text-accent peer-[&:not(:placeholder-shown)]:top-2 peer-[&:not(:placeholder-shown)]:translate-y-0 peer-[&:not(:placeholder-shown)]:text-[10px]"
+          style="line-height: 1"
+          >Username</label
+        >
+        <p class="hidden text-xs text-error mt-1 pl-1" id="usernameError"></p>
+      </div>
+
+      <div class="relative">
+        <input
+          type="email"
+          id="email"
+          required
+          placeholder=" "
+          autocomplete="email"
+          class="peer w-full px-4 pt-6 pb-2.5 bg-bg-secondary border border-border rounded-xl text-sm font-medium text-text-primary placeholder-transparent focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all duration-200"
+        />
+        <label
+          for="email"
+          class="absolute left-4 text-text-tertiary transition-all duration-200 pointer-events-none peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:text-accent peer-[&:not(:placeholder-shown)]:top-2 peer-[&:not(:placeholder-shown)]:translate-y-0 peer-[&:not(:placeholder-shown)]:text-[10px]"
+          style="line-height: 1"
+          >Email address</label
+        >
+        <p class="hidden text-xs text-error mt-1 pl-1" id="emailError"></p>
+      </div>
+
+      <div class="relative">
+        <input
+          type="password"
+          id="password"
+          required
+          placeholder=" "
+          autocomplete="new-password"
+          class="peer w-full px-4 pt-6 pb-2.5 bg-bg-secondary border border-border rounded-xl text-sm font-medium text-text-primary placeholder-transparent focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all duration-200"
+        />
+        <label
+          for="password"
+          class="absolute left-4 text-text-tertiary transition-all duration-200 pointer-events-none peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:text-accent peer-[&:not(:placeholder-shown)]:top-2 peer-[&:not(:placeholder-shown)]:translate-y-0 peer-[&:not(:placeholder-shown)]:text-[10px]"
+          style="line-height: 1"
+          >Password</label
+        >
+        <button
+          type="button"
+          onclick="togglePassword('password', this)"
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary transition-colors"
+          tabindex="-1"
+        >
+          <i class="fas fa-eye text-xs"></i>
+        </button>
+        <p class="hidden text-xs text-error mt-1 pl-1" id="passwordError"></p>
+
+        <div id="passwordStrength" class="hidden mt-2 space-y-1.5">
+          <div class="flex gap-1">
+            <div class="flex-1 h-1 rounded-full bg-bg-tertiary" id="str1"></div>
+            <div class="flex-1 h-1 rounded-full bg-bg-tertiary" id="str2"></div>
+            <div class="flex-1 h-1 rounded-full bg-bg-tertiary" id="str3"></div>
+            <div class="flex-1 h-1 rounded-full bg-bg-tertiary" id="str4"></div>
+          </div>
+          <p class="text-[10px] text-text-tertiary" id="strengthText"></p>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary w-full !py-3">
+        Create Account <i class="fas fa-arrow-right ml-2 text-xs"></i>
+      </button>
+    </form>
+
+    <div
+      id="error"
+      class="hidden mt-4 p-3 bg-error-bg border border-error/30 rounded-xl text-sm text-error flex items-start gap-2"
+    >
+      <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+      <span id="errorMessage"></span>
+    </div>
+
+    <div class="flex items-center gap-3 my-6">
+      <div class="flex-1 h-px bg-border"></div>
+      <span class="text-xs text-text-tertiary font-medium">or</span>
+      <div class="flex-1 h-px bg-border"></div>
+    </div>
+
+    <p class="text-center text-sm text-text-tertiary">
+      Have an account?
+      <a href="/login" class="text-accent-light hover:underline font-semibold"
+        >Sign in</a
+      >
+    </p>
+  </div>
+</div>
+
+<style>
+  .peer:focus ~ label,
+  .peer:not(:placeholder-shown) ~ label {
+    top: 0.5rem !important;
+    transform: translateY(0) !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+  }
+  .peer:focus ~ label {
+    color: #0070f3 !important;
+  }
+  .peer-placeholder-shown ~ label {
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 14px !important;
+    color: #737373 !important;
+  }
+</style>
+
+<script>
+  var usernameInput = document.getElementById("username");
+  var emailInput = document.getElementById("email");
+  var passInput = document.getElementById("password");
+  var userErr = document.getElementById("usernameError");
+  var emailErr = document.getElementById("emailError");
+  var passErr = document.getElementById("passwordError");
+
+  function togglePassword(id, btn) {
+    var input = document.getElementById(id);
+    var icon = btn.querySelector("i");
+    if (input.type === "password") {
+      input.type = "text";
+      icon.className = "fas fa-eye-slash text-xs";
+    } else {
+      input.type = "password";
+      icon.className = "fas fa-eye text-xs";
+    }
+  }
+
+  function isValidEmail(email) {
+    return /^[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,6}$/.test(
+      email,
+    );
+  }
+
+  function checkPasswordStrength(password) {
+    var score = 0;
+    if (password.length >= 6) score++;
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    return Math.min(score, 4);
+  }
+
+  var strengthColors = [
+    "bg-bg-tertiary",
+    "bg-error",
+    "bg-warning",
+    "bg-accent",
+    "bg-success",
+  ];
+  var strengthLabels = ["", "Weak", "Fair", "Good", "Strong"];
+
+  function validateUsername() {
+    var val = usernameInput.value.trim();
+    usernameInput.classList.remove("border-error", "border-success");
+    userErr.classList.add("hidden");
+    if (!val) return;
+    if (val.length < 3) {
+      userErr.textContent = "Min. 3 characters";
+      userErr.classList.remove("hidden");
+      usernameInput.classList.add("border-error");
+    } else {
+      usernameInput.classList.add("border-success");
+    }
+  }
+
+  function validateEmail() {
+    var val = emailInput.value.trim();
+    emailInput.classList.remove("border-error", "border-success");
+    emailErr.classList.add("hidden");
+    if (!val) return;
+    if (!isValidEmail(val)) {
+      emailErr.textContent = "Please enter a valid email";
+      emailErr.classList.remove("hidden");
+      emailInput.classList.add("border-error");
+    } else {
+      emailInput.classList.add("border-success");
+    }
+  }
+
+  function validatePassword() {
+    var val = passInput.value;
+    passInput.classList.remove("border-error", "border-success");
+    passErr.classList.add("hidden");
+
+    var strengthDiv = document.getElementById("passwordStrength");
+    var strength = checkPasswordStrength(val);
+
+    if (!val) {
+      strengthDiv.classList.add("hidden");
+      return;
+    }
+
+    strengthDiv.classList.remove("hidden");
+    for (var i = 1; i <= 4; i++) {
+      document.getElementById("str" + i).className =
+        "flex-1 h-1 rounded-full " +
+        (i <= strength ? strengthColors[strength] : "bg-bg-tertiary");
+    }
+    document.getElementById("strengthText").textContent =
+      strength > 0 ? "Password strength: " + strengthLabels[strength] : "";
+
+    if (val.length < 6) {
+      passErr.textContent = "Min. 6 characters";
+      passErr.classList.remove("hidden");
+      passInput.classList.add("border-error");
+    } else {
+      passInput.classList.add("border-success");
+    }
+  }
+
+  var debouncedValidateUser = debounce(validateUsername, 400);
+  var debouncedValidateEmail = debounce(validateEmail, 400);
+  var debouncedValidatePass = debounce(validatePassword, 400);
+
+  usernameInput.addEventListener("input", debouncedValidateUser);
+  emailInput.addEventListener("input", debouncedValidateEmail);
+  passInput.addEventListener("input", debouncedValidatePass);
+
+  document
+    .getElementById("registerForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+      var valid = true;
+      var user = usernameInput.value.trim();
+      var email = emailInput.value.trim();
+      var pass = passInput.value;
+
+      [usernameInput, emailInput, passInput].forEach(function (el) {
+        el.classList.remove("border-error", "border-success");
+      });
+      [userErr, emailErr, passErr].forEach(function (el) {
+        el.classList.add("hidden");
+      });
+
+      if (!user) {
+        userErr.textContent = "Username is required";
+        userErr.classList.remove("hidden");
+        usernameInput.classList.add("border-error");
+        valid = false;
+      } else if (user.length < 3) {
+        userErr.textContent = "Min. 3 characters";
+        userErr.classList.remove("hidden");
+        usernameInput.classList.add("border-error");
+        valid = false;
+      }
+
+      if (!email) {
+        emailErr.textContent = "Email is required";
+        emailErr.classList.remove("hidden");
+        emailInput.classList.add("border-error");
+        valid = false;
+      } else if (!isValidEmail(email)) {
+        emailErr.textContent = "Valid email required";
+        emailErr.classList.remove("hidden");
+        emailInput.classList.add("border-error");
+        valid = false;
+      }
+
+      if (!pass) {
+        passErr.textContent = "Password is required";
+        passErr.classList.remove("hidden");
+        passInput.classList.add("border-error");
+        valid = false;
+      } else if (pass.length < 6) {
+        passErr.textContent = "Min. 6 characters";
+        passErr.classList.remove("hidden");
+        passInput.classList.add("border-error");
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      var btn = this.querySelector('button[type="submit"]');
+      var orig = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML =
+        '<i class="fas fa-spinner fa-spin mr-2"></i>Creating account...';
+
+      try {
+        var r = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: user,
+            email: email,
+            password: pass,
+          }),
+          credentials: "include",
+        });
+        var d = await r.json();
+        if (d.success) {
+          window.location.href = "/dashboard";
+        } else {
+          document.getElementById("errorMessage").textContent = d.message;
+          document.getElementById("error").classList.remove("hidden");
+        }
+      } catch (e) {
+        document.getElementById("errorMessage").textContent = "Network error.";
+        document.getElementById("error").classList.remove("hidden");
+      }
+      btn.disabled = false;
+      btn.innerHTML = orig;
+    });
+
+  function debounce(fn, wait) {
+    var timeout;
+    return function () {
+      var ctx = this,
+        args = arguments;
+      clearTimeout(timeout);
+      timeout = setTimeout(function () {
+        fn.apply(ctx, args);
+      }, wait);
+    };
+  }
+</script>
+<%- include('partials/footer') %>

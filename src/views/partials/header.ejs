@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MakeItShorter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'Fira Code', 'monospace'] },
+                    colors: {
+                        bg: { primary: '#000000', secondary: '#0a0a0a', tertiary: '#141414', hover: '#1a1a1a' },
+                        border: { DEFAULT: '#2e2e2e', hover: '#3a3a3a' },
+                        text: { primary: '#ededed', secondary: '#a1a1a1', tertiary: '#737373' },
+                        accent: { DEFAULT: '#0070f3', hover: '#0051b3', light: '#3291ff' },
+                        success: { DEFAULT: '#0cce6b', bg: '#0a3622' },
+                        error: { DEFAULT: '#ff4444', bg: '#3b1212' },
+                        warning: { DEFAULT: '#f5a623', bg: '#3b2e0a' }
+                    },
+                    animation: { 'fade-in': 'fadeIn 0.5s ease-out', 'slide-up': 'slideUp 0.5s ease-out' },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { background: #000000; color: #ededed; font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+        .gradient-text { background: linear-gradient(135deg, #0070f3, #3291ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .glass-nav { background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); border-bottom: 1px solid #2e2e2e; }
+        .card { background: #0a0a0a; border: 1px solid #2e2e2e; border-radius: 12px; }
+        .card-hover:hover { border-color: #3a3a3a; background: #141414; }
+        .btn-primary { background: #ffffff; color: #000000; font-weight: 600; border-radius: 8px; padding: 10px 20px; font-size: 14px; transition: all 0.2s; }
+        .btn-primary:hover { background: #e5e5e5; }
+        .btn-secondary { background: #0a0a0a; color: #ededed; font-weight: 600; border: 1px solid #2e2e2e; border-radius: 8px; padding: 10px 20px; font-size: 14px; transition: all 0.2s; }
+        .btn-secondary:hover { border-color: #3a3a3a; background: #141414; }
+        .btn-ghost { color: #a1a1a1; font-weight: 500; font-size: 14px; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
+        .btn-ghost:hover { color: #ededed; background: #141414; }
+        .input-field { background: #0a0a0a; border: 1px solid #2e2e2e; border-radius: 8px; padding: 10px 16px; font-size: 14px; color: #ededed; outline: none; transition: border-color 0.2s; width: 100%; }
+        .input-field:focus { border-color: #0070f3; }
+        .input-field::placeholder { color: #737373; }
+        select { background: #0a0a0a; border: 1px solid #2e2e2e; border-radius: 8px; padding: 10px 16px; font-size: 14px; color: #ededed; outline: none; }
+        .badge { font-size: 12px; padding: 3px 10px; border-radius: 100px; font-weight: 500; }
+        ::selection { background: #0070f3; color: white; }
+        details summary { cursor: pointer; }
+        details summary::-webkit-details-marker { display: none; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #2e2e2e; border-radius: 100px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-bg-primary">
+    <nav class="glass-nav sticky top-0 z-50 h-14">
+        <div class="max-w-6xl mx-auto px-6 h-full flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3 group">
+                <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <i class="fas fa-link text-black text-xs"></i>
+                </div>
+                <span class="text-sm font-bold text-text-primary tracking-tight">MakeIt<span class="text-text-tertiary">Shorter</span></span>
+            </a>
+
+            <div class="flex items-center gap-2">
+                <% if(typeof user!=='undefined' && user && user.role === 'admin'){ %>
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-bg-tertiary/50 rounded-lg border border-border/50">
+                    <span class="w-1.5 h-1.5 bg-success rounded-full animate-pulse"></span>
+                    <span class="text-xs font-medium text-text-secondary" id="headerOnlineCount">0</span>
+                    <span class="text-[10px] text-text-tertiary">online</span>
+                </div>
+                <% } %>
+
+                <% if(typeof user!=='undefined' && user){ %>
+                    <% if(user.role === 'admin'){ %>
+                    <a href="/admin/dashboard" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm text-accent hover:bg-accent/10 rounded-lg transition-all">
+                        <i class="fas fa-crown text-xs"></i>
+                        <span>Admin Panel</span>
+                    </a>
+                    <% }else{ %>
+                    <a href="/dashboard" class="hidden sm:flex items-center gap-2 px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary hover:bg-bg-hover rounded-lg transition-all">
+                        <i class="fas fa-chart-pie text-xs text-text-tertiary"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <% } %>
+
+                    <div class="relative group">
+                        <button class="flex items-center gap-2 p-1.5 hover:bg-bg-hover rounded-lg transition-colors">
+                            <div class="w-7 h-7 bg-white rounded-full flex items-center justify-center text-black text-[10px] font-bold">
+                                <%= user.username.charAt(0).toUpperCase() %>
+                            </div>
+                            <span class="text-sm font-medium text-text-primary hidden sm:block"><%= user.username %></span>
+                            <i class="fas fa-chevron-down text-[10px] text-text-tertiary transition-transform duration-200 group-hover:rotate-180"></i>
+                        </button>
+                        <div class="absolute right-0 top-full mt-2 w-56 bg-bg-secondary border border-border rounded-xl py-2 hidden group-hover:block z-50 shadow-xl animate-fade-in">
+                            <div class="px-4 py-3 border-b border-border">
+                                <p class="text-sm font-semibold text-text-primary"><%= user.username %></p>
+                                <p class="text-xs text-text-tertiary"><%= user.email %></p>
+                                <span class="badge mt-1.5 inline-block <%= user.role === 'admin' ? 'bg-accent/20 text-accent' : 'bg-bg-tertiary text-text-secondary' %>"><%= user.role %></span>
+                            </div>
+                            <div class="py-1">
+                                <% if(user.role === 'admin'){ %>
+                                <a href="/admin/dashboard" class="flex items-center gap-3 px-4 py-2.5 text-sm text-accent hover:bg-bg-hover transition-colors"><i class="fas fa-crown w-4"></i>Admin Panel</a>
+                                <a href="/admin/dashboard#users" class="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-bg-hover transition-colors"><i class="fas fa-users w-4 text-text-tertiary"></i>Users</a>
+                                <a href="/admin/dashboard#links" class="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-bg-hover transition-colors"><i class="fas fa-link w-4 text-text-tertiary"></i>All Links</a>
+                                <a href="/admin/dashboard#blacklist" class="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-bg-hover transition-colors"><i class="fas fa-shield-halved w-4 text-text-tertiary"></i>Blacklist</a>
+                                <a href="/admin/dashboard#profile" class="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-bg-hover transition-colors"><i class="fas fa-user-gear w-4 text-text-tertiary"></i>Profile</a>
+                                <% }else{ %>
+                                <a href="/dashboard" class="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors"><i class="fas fa-chart-pie w-4 text-text-tertiary"></i>Dashboard</a>
+                                <a href="/dashboard#links" class="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors"><i class="fas fa-link w-4 text-text-tertiary"></i>My Links</a>
+                                <a href="/dashboard#profile" class="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors"><i class="fas fa-user-gear w-4 text-text-tertiary"></i>Profile</a>
+                                <% } %>
+                            </div>
+                            <div class="border-t border-border pt-1">
+                                <a href="#" onclick="logout()" class="flex items-center gap-3 px-4 py-2.5 text-sm text-error hover:bg-bg-hover transition-colors"><i class="fas fa-sign-out-alt w-4"></i>Log out</a>
+                            </div>
+                        </div>
+                    </div>
+                <% }else{ %>
+                    <a href="/login" class="btn-ghost">Log in</a>
+                    <a href="/register" class="btn-primary !py-2 !px-4 !text-xs">Sign up</a>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+    <main class="flex-1 w-full">
+
+    <script>
+    async function logout() {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+        } catch(e) {}
+        window.location.href = '/login';
+    }
+
+    (function() {
+        if (!window.socket) {
+            const token = localStorage.getItem('accessToken') || null;
+            window.socket = io(window.location.origin, {
+                auth: { token: token || '' },
+                withCredentials: true,
+                transports: ['websocket', 'polling'],
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000,
+            });
+
+            window.socket.on('connect', function() {
+                console.log('Socket connected:', this.id);
+            });
+
+            window.socket.on('connect_error', function(error) {
+                console.error('Socket error:', error.message);
+            });
+
+            window.socket.on('disconnect', function(reason) {
+                console.log('Socket disconnected:', reason);
+            });
+        }
+
+        function updateOnlineCount(count) {
+            const el = document.getElementById('headerOnlineCount');
+            if (el) {
+                el.textContent = count || 0;
+            }
+        }
+
+        function requestOnlineStats() {
+            if (window.socket && window.socket.connected) {
+                window.socket.emit('get-online-stats');
+            }
+        }
+
+        if (window.socket) {
+            window.socket.off('online-stats');
+            window.socket.on('online-stats', function(stats) {
+                if (stats && typeof stats.total === 'number') {
+                    updateOnlineCount(stats.total);
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.socket && window.socket.connected) {
+                requestOnlineStats();
+            }
+
+            if (window.socket) {
+                window.socket.on('connect', function() {
+                    requestOnlineStats();
+                });
+            }
+
+            setInterval(function() {
+                if (window.socket && window.socket.connected) {
+                    requestOnlineStats();
+                }
+            }, 10000);
+        });
+    })();
+    </script>

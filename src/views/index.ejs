@@ -1,0 +1,399 @@
+<%- include('partials/header') %>
+
+<section class="min-h-[80vh] flex items-center justify-center px-6 py-20">
+    <div class="max-w-2xl mx-auto text-center w-full">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-bg-secondary border border-border rounded-full text-xs font-medium text-text-secondary mb-8">
+            <span class="w-1.5 h-1.5 bg-success rounded-full"></span>
+            Free & Open Source
+        </div>
+
+        <h1 class="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-text-primary tracking-tight leading-[1.05] mb-6">
+            Shorten links.<br>
+            <span class="gradient-text">Ship faster.</span>
+        </h1>
+
+        <p class="text-base text-text-secondary mb-10 max-w-lg mx-auto leading-relaxed">
+            A minimal URL shortener built for speed. Custom aliases, real-time analytics, zero bloat.
+        </p>
+
+        <div class="max-w-md mx-auto">
+            <div class="relative group">
+                <input
+                    type="url"
+                    id="originalUrl"
+                    required
+                    placeholder=" "
+                    autofocus
+                    autocomplete="url"
+                    class="peer w-full px-5 pt-6 pb-3 bg-bg-secondary border border-border rounded-xl text-sm font-medium text-text-primary placeholder-transparent focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all duration-200 font-mono"
+                >
+                <label
+                    for="originalUrl"
+                    class="absolute left-5 text-text-tertiary transition-all duration-200 pointer-events-none
+                    peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm
+                    peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:text-accent
+                    peer-[&:not(:placeholder-shown)]:top-2 peer-[&:not(:placeholder-shown)]:translate-y-0 peer-[&:not(:placeholder-shown)]:text-[10px]"
+                    style="line-height:1"
+                >
+                    Paste your long URL
+                </label>
+                <div id="urlLoading" class="hidden absolute right-16 top-1/2 -translate-y-1/2">
+                    <i class="fas fa-spinner fa-spin text-text-tertiary text-sm"></i>
+                </div>
+                <div id="urlValidIcon" class="hidden absolute right-16 top-1/2 -translate-y-1/2">
+                    <i class="fas fa-check-circle text-success text-sm"></i>
+                </div>
+                <div id="urlErrorIcon" class="hidden absolute right-16 top-1/2 -translate-y-1/2">
+                    <i class="fas fa-exclamation-circle text-error text-sm"></i>
+                </div>
+                <button
+                    type="submit"
+                    id="shortenBtn"
+                    disabled
+                    class="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-white text-black rounded-lg font-semibold text-sm hover:bg-gray-200 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                    Shorten
+                </button>
+            </div>
+            <p id="urlError" class="hidden mt-2 text-xs text-error text-left pl-1"></p>
+            <p id="urlWarning" class="hidden mt-2 text-xs text-warning text-left pl-1"></p>
+            <p id="urlBlacklistInfo" class="hidden mt-2 text-xs text-error text-left pl-1"></p>
+
+            <% if(typeof user!=='undefined'&&user){ %>
+            <div class="mt-4 space-y-3">
+                <button
+                    onclick="toggleAdvanced()"
+                    class="text-xs font-medium text-text-tertiary hover:text-text-secondary transition-colors flex items-center gap-1.5"
+                >
+                    <i id="advancedIcon" class="fas fa-chevron-down text-[8px] transition-transform duration-200"></i>
+                    <span>Advanced options</span>
+                </button>
+
+                <div id="advancedOptions" class="hidden space-y-3">
+                    <div class="relative">
+                        <div class="flex items-center bg-bg-secondary border border-border rounded-xl overflow-hidden focus-within:border-accent transition-all duration-200">
+                            <span class="pl-5 pr-1.5 text-sm text-text-tertiary font-mono flex-shrink-0">/l/</span>
+                            <div class="relative flex-1">
+                                <input
+                                    type="text"
+                                    id="customCode"
+                                    placeholder=" "
+                                    class="peer w-full pt-6 pb-2.5 pr-4 text-sm font-medium bg-transparent border-0 outline-none text-text-primary placeholder-transparent font-mono"
+                                >
+                                <label
+                                    for="customCode"
+                                    class="absolute left-0 text-text-tertiary transition-all duration-200 pointer-events-none
+                                    peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm
+                                    peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:text-accent
+                                    peer-[&:not(:placeholder-shown)]:top-2 peer-[&:not(:placeholder-shown)]:translate-y-0 peer-[&:not(:placeholder-shown)]:text-[10px]"
+                                    style="line-height:1"
+                                >
+                                    custom-alias
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <input
+                            type="text"
+                            id="title"
+                            placeholder=" "
+                            class="peer w-full px-5 pt-6 pb-2.5 bg-bg-secondary border border-border rounded-xl text-sm font-medium text-text-primary placeholder-transparent focus:border-accent outline-none transition-all duration-200"
+                        >
+                        <label
+                            for="title"
+                            class="absolute left-5 text-text-tertiary transition-all duration-200 pointer-events-none
+                            peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm
+                            peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:text-accent
+                            peer-[&:not(:placeholder-shown)]:top-2 peer-[&:not(:placeholder-shown)]:translate-y-0 peer-[&:not(:placeholder-shown)]:text-[10px]"
+                            style="line-height:1"
+                        >
+                            Title (optional)
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+
+        <div id="result" class="hidden mt-5 max-w-md mx-auto">
+            <div class="bg-bg-secondary border border-success/30 rounded-xl p-4 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i class="fas fa-check-circle text-success text-sm flex-shrink-0"></i>
+                    <a id="shortUrl" href="#" target="_blank" class="text-accent-light font-medium text-sm hover:underline truncate font-mono"></a>
+                </div>
+                <button id="copyBtn" class="px-3 py-1.5 bg-success/10 text-success rounded-lg text-xs font-semibold hover:bg-success/20 transition-all flex-shrink-0">Copy</button>
+            </div>
+        </div>
+
+        <div id="error" class="hidden mt-4 max-w-md mx-auto p-4 bg-error-bg border border-error/30 rounded-xl text-sm text-error flex items-start gap-3 text-left">
+            <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+            <span id="errorMessage"></span>
+        </div>
+    </div>
+</section>
+
+<section class="py-16 border-t border-border">
+    <div class="max-w-5xl mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center p-6">
+                <div class="w-10 h-10 bg-bg-secondary border border-border rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-bolt text-accent text-sm"></i>
+                </div>
+                <h3 class="text-sm font-bold text-text-primary mb-2">Edge Redirects</h3>
+                <p class="text-xs text-text-tertiary">Global CDN with instant redirects.</p>
+            </div>
+            <div class="text-center p-6">
+                <div class="w-10 h-10 bg-bg-secondary border border-border rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-chart-line text-accent text-sm"></i>
+                </div>
+                <h3 class="text-sm font-bold text-text-primary mb-2">Analytics</h3>
+                <p class="text-xs text-text-tertiary">Track every click in real-time.</p>
+            </div>
+            <div class="text-center p-6">
+                <div class="w-10 h-10 bg-bg-secondary border border-border rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-shield-halved text-accent text-sm"></i>
+                </div>
+                <h3 class="text-sm font-bold text-text-primary mb-2">Secure</h3>
+                <p class="text-xs text-text-tertiary">HTTPS everywhere. Always encrypted.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<% if(typeof user==='undefined'||!user){ %>
+<section class="py-16 border-t border-border">
+    <div class="max-w-lg mx-auto px-6 text-center">
+        <h2 class="text-2xl font-extrabold text-text-primary mb-3">Start shortening today</h2>
+        <p class="text-text-secondary text-sm mb-8">Free forever. No credit card required.</p>
+        <div class="flex flex-col sm:flex-row justify-center gap-3">
+            <a href="/register" class="btn-primary">Create Free Account</a>
+            <a href="/login" class="btn-secondary">Sign In</a>
+        </div>
+    </div>
+</section>
+<% } %>
+
+<form id="shortenForm" class="hidden"></form>
+
+<style>
+.peer:focus ~ label { top: 0.5rem !important; transform: translateY(0) !important; font-size: 10px !important; color: #0070f3 !important; line-height: 1 !important; }
+.peer:not(:placeholder-shown) ~ label { top: 0.5rem !important; transform: translateY(0) !important; font-size: 10px !important; line-height: 1 !important; }
+.peer-placeholder-shown ~ label { top: 50% !important; transform: translateY(-50%) !important; font-size: 14px !important; color: #737373 !important; line-height: 1 !important; }
+</style>
+
+<script>
+var urlInput = document.getElementById('originalUrl');
+var shortenBtn = document.getElementById('shortenBtn');
+var urlError = document.getElementById('urlError');
+var urlWarning = document.getElementById('urlWarning');
+var urlBlacklistInfo = document.getElementById('urlBlacklistInfo');
+var validIcon = document.getElementById('urlValidIcon');
+var errorIcon = document.getElementById('urlErrorIcon');
+var loadingIcon = document.getElementById('urlLoading');
+var advancedOpen = false;
+var checkTimeout = null;
+
+function isValidUrl(str) {
+    if (!str) return false;
+    try {
+        var url = new URL(str);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch (e) {
+        return false;
+    }
+}
+
+function resetIcons() {
+    validIcon.classList.add('hidden');
+    errorIcon.classList.add('hidden');
+    loadingIcon.classList.add('hidden');
+}
+
+function hideMessages() {
+    urlError.classList.add('hidden');
+    urlWarning.classList.add('hidden');
+    urlBlacklistInfo.classList.add('hidden');
+}
+
+function checkBlacklist(url) {
+    if (!url || !isValidUrl(url)) return;
+    clearTimeout(checkTimeout);
+    checkTimeout = setTimeout(async function() {
+        resetIcons();
+        loadingIcon.classList.remove('hidden');
+        try {
+            var response = await fetch('/api/links/check-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: url }),
+                credentials: 'include'
+            });
+            var data = await response.json();
+            loadingIcon.classList.add('hidden');
+            if (data.blacklisted) {
+                errorIcon.classList.remove('hidden');
+                urlBlacklistInfo.textContent = 'This URL is blacklisted: ' + (data.reason || 'Blocked');
+                urlBlacklistInfo.classList.remove('hidden');
+                shortenBtn.disabled = true;
+                urlInput.classList.add('border-error');
+                urlInput.classList.remove('border-success');
+            } else {
+                validIcon.classList.remove('hidden');
+                hideMessages();
+                shortenBtn.disabled = false;
+                urlInput.classList.add('border-success');
+                urlInput.classList.remove('border-error');
+            }
+        } catch (err) {
+            loadingIcon.classList.add('hidden');
+            validIcon.classList.remove('hidden');
+            shortenBtn.disabled = false;
+            urlInput.classList.add('border-success');
+            urlInput.classList.remove('border-error');
+        }
+    }, 600);
+}
+
+function validateUrlInput() {
+    var val = urlInput.value.trim();
+    hideMessages();
+    if (!val) {
+        shortenBtn.disabled = true;
+        resetIcons();
+        urlInput.classList.remove('border-success', 'border-error');
+        return;
+    }
+    if (!isValidUrl(val)) {
+        shortenBtn.disabled = true;
+        resetIcons();
+        errorIcon.classList.remove('hidden');
+        urlError.textContent = 'Please enter a valid URL (https://example.com)';
+        urlError.classList.remove('hidden');
+        urlInput.classList.add('border-error');
+        urlInput.classList.remove('border-success');
+        return;
+    }
+    resetIcons();
+    urlInput.classList.remove('border-error');
+    checkBlacklist(val);
+}
+
+var debouncedValidate = debounce(validateUrlInput, 500);
+urlInput.addEventListener('input', debouncedValidate);
+urlInput.addEventListener('blur', function() {
+    var val = urlInput.value.trim();
+    if (val && !isValidUrl(val)) {
+        resetIcons();
+        errorIcon.classList.remove('hidden');
+        urlError.textContent = 'Please enter a valid URL starting with http:// or https://';
+        urlError.classList.remove('hidden');
+        urlInput.classList.add('border-error');
+    }
+});
+urlInput.addEventListener('focus', function() {
+    if (!urlInput.value.trim()) {
+        hideMessages();
+        resetIcons();
+        urlInput.classList.remove('border-error');
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    validateUrlInput();
+});
+
+shortenBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    var url = urlInput.value.trim();
+    if (!url || !isValidUrl(url)) {
+        urlError.textContent = 'Please enter a valid URL';
+        urlError.classList.remove('hidden');
+        urlInput.focus();
+        return;
+    }
+    var btn = this;
+    var orig = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '...';
+    document.getElementById('result').classList.add('hidden');
+    document.getElementById('error').classList.add('hidden');
+    fetch('/api/links/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            originalUrl: url,
+            customCode: document.getElementById('customCode') ? document.getElementById('customCode').value : '',
+            title: document.getElementById('title') ? document.getElementById('title').value : ''
+        }),
+        credentials: 'include'
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.success) {
+            var u = location.origin + '/l/' + d.link.shortCode;
+            document.getElementById('shortUrl').href = u;
+            document.getElementById('shortUrl').textContent = u;
+            document.getElementById('result').classList.remove('hidden');
+            urlInput.value = '';
+            validateUrlInput();
+            if (document.getElementById('customCode')) document.getElementById('customCode').value = '';
+            if (document.getElementById('title')) document.getElementById('title').value = '';
+        } else {
+            document.getElementById('errorMessage').textContent = d.message;
+            document.getElementById('error').classList.remove('hidden');
+        }
+    })
+    .catch(function() {
+        document.getElementById('errorMessage').textContent = 'Something went wrong.';
+        document.getElementById('error').classList.remove('hidden');
+    })
+    .finally(function() {
+        btn.disabled = false;
+        btn.textContent = orig;
+    });
+});
+
+document.getElementById('copyBtn').addEventListener('click', function() {
+    var u = document.getElementById('shortUrl').textContent;
+    if (!u) return;
+    navigator.clipboard.writeText(u).then(function() {
+        var b = document.getElementById('copyBtn');
+        var og = b.textContent;
+        b.textContent = 'Copied!';
+        setTimeout(function() { b.textContent = og; }, 2000);
+    });
+});
+
+urlInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !shortenBtn.disabled) {
+        e.preventDefault();
+        shortenBtn.click();
+    }
+});
+
+function toggleAdvanced() {
+    advancedOpen = !advancedOpen;
+    var el = document.getElementById('advancedOptions');
+    var icon = document.getElementById('advancedIcon');
+    if (advancedOpen) {
+        el.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+    } else {
+        el.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+    }
+}
+
+function debounce(fn, wait) {
+    var timeout;
+    return function() {
+        var ctx = this;
+        var args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(function() { fn.apply(ctx, args); }, wait);
+    };
+}
+</script>
+<%- include('partials/footer') %>
